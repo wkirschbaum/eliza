@@ -31,7 +31,7 @@ defmodule Eliza.Words do
     words["verbs"]
     |> Enum.map(&string/1)
 
-  word_chars = [?a..?z, ?A..?Z, ?0..?9]
+  word_chars = [?a..?z, ?A..?Z, ?0..?9, ?']
 
   words =
     empty()

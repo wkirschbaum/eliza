@@ -6,24 +6,43 @@ defmodule Eliza do
   """
 
   def consult(input, history) do
-    input
-    |> String.downcase()
-    |> Eliza.Words.parse()
-    |> extract_sentence()
-    |> transform()
-    |> random_question
-    |> capitalize_sentence
-    |> to_response()
-    |> dbg
+    output =
+      input
+      |> String.downcase()
+      |> Eliza.Words.parse()
+      |> extract_sentence()
+      |> transform()
+      |> random_question
+      |> capitalize_sentence
+      |> to_response()
 
-    {input, history}
+    {input, output, history}
   end
 
-  defp random_question(words) do
+  defp random_question({words, _keywords}) do
+    first_noun =
+      Enum.filter(words, fn
+        {:noun, _word} -> true
+        _ -> false
+      end)
+      |> Enum.random()
+
+    words =
+      case first_noun do
+        nil -> Enum.map(words, fn {_, word} -> word end)
+        {_, word} -> word
+      end
+
     [
-      [] ++ words ++ ["?"]
+      [] ++ words ++ ["?"],
+      ["what do yo mean by"] ++ words ++ ["?"],
+      ["tell me more about"] ++ words ++ ["?"],
+      ["is it because of"] ++ words ++ ["that you come to me?"]
     ]
     |> Enum.random()
+  end
+
+  defp get_token(tokens) do
   end
 
   defp to_response(words) do
@@ -40,28 +59,30 @@ defmodule Eliza do
 
   defp transform(words, results \\ [])
 
-  defp transform([], results), do: Enum.reverse(results)
+  defp transform({[], keywords}, results), do: {Enum.reverse(results), keywords}
 
-  defp transform([{_, [word]} | words], results) do
+  defp transform({[{type, [val]} | words], keywords}, results) do
     new_word =
-      case word do
+      case val do
         "i" -> "you"
         "you" -> "I"
+        "your" -> "my"
         "mine" -> "yours"
         "are" -> "am"
         other -> other
       end
 
-    transform(words, [new_word | results])
+    transform({words, keywords}, [{type, [new_word]} | results])
   end
 
   defp extract_sentence(tokens, sentence \\ [], keywords \\ [])
 
-  defp extract_sentence([], sentence, _keywords), do: Enum.reverse(sentence)
+  defp extract_sentence([], sentence, keywords),
+    do: {Enum.reverse(sentence), Enum.reverse(keywords)}
 
   defp extract_sentence([{:delimiter, _} | _tokens], sentence, keywords)
        when length(keywords) > 0 do
-    Enum.reverse(sentence)
+    {Enum.reverse(sentence), Enum.reverse(keywords)}
   end
 
   defp extract_sentence([{:delimiter, _} | tokens], _sentence, _keywords) do
