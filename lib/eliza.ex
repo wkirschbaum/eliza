@@ -10,9 +10,49 @@ defmodule Eliza do
     |> String.downcase()
     |> Eliza.Words.parse()
     |> extract_sentence()
+    |> transform()
+    |> random_question
+    |> capitalize_sentence
+    |> to_response()
     |> dbg
 
     {input, history}
+  end
+
+  defp random_question(words) do
+    [
+      [] ++ words ++ ["?"]
+    ]
+    |> Enum.random()
+  end
+
+  defp to_response(words) do
+    words
+    |> Enum.join(" ")
+    |> String.replace(~r/ [\?\.]/, "?")
+  end
+
+  defp capitalize_sentence([]), do: []
+
+  defp capitalize_sentence([word | words]) do
+    [String.capitalize(word) | words]
+  end
+
+  defp transform(words, results \\ [])
+
+  defp transform([], results), do: Enum.reverse(results)
+
+  defp transform([{_, [word]} | words], results) do
+    new_word =
+      case word do
+        "i" -> "you"
+        "you" -> "I"
+        "mine" -> "yours"
+        "are" -> "am"
+        other -> other
+      end
+
+    transform(words, [new_word | results])
   end
 
   defp extract_sentence(tokens, sentence \\ [], keywords \\ [])
