@@ -19,12 +19,12 @@ defmodule Eliza do
 
   defp extract_sentence([], sentence, _keywords), do: Enum.reverse(sentence)
 
-  defp extract_sentence([{:delimeter, _} | _tokens], sentence, keywords)
+  defp extract_sentence([{:delimiter, _} | _tokens], sentence, keywords)
        when length(keywords) > 0 do
     Enum.reverse(sentence)
   end
 
-  defp extract_sentence([{:delimeter, _} | tokens], _sentence, _keywords) do
+  defp extract_sentence([{:delimiter, _} | tokens], _sentence, _keywords) do
     extract_sentence(tokens, [], [])
   end
 
