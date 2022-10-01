@@ -28,7 +28,7 @@ defmodule Eliza do
     extract_sentence(tokens, [], [])
   end
 
-  defp extract_sentence([{:noun, token} | tokens], sentence, keywords) do
+  defp extract_sentence([{:noun, _val} = token | tokens], sentence, keywords) do
     extract_sentence(tokens, [token | sentence], keywords)
   end
 
